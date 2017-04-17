@@ -1,37 +1,64 @@
-/*
-*
-* Описываю основные классы для работы с расписанием.
-* Lection принимает имя (string)
-* School принимает имя (string) и количество (Number)
-* Cabinet принимает имя (string) и вместимость (Number)
-*
-*/
 function Lection(){ 
 	this.name;
-	this.school = [];
+	//this.school = [];
 	this.lector = [];
 }
+Lection.prototype.id = 0;
 Lection.prototype.lections = [];
-Lection.prototype.setLection = function(){
-    for (var i = 0; i < arguments.length; i++) {
-      this.lections.push(arguments[i]);
-      this.name = arguments[i].title;
-    }
+Lection.prototype._unique = function( array ){
+	var obj = {};
+	for (var i = 0; i < array.length; i++) {
+	   var str = array[i];
+	   obj[str] = true; // запомнить строку в виде свойства объекта
+	}
+	return Object.keys(obj);
+}
+Lection.prototype.setLection = function(obj){
+	this.name = obj.name;
+	this.lections.push({
+	  name : obj.name,
+	  id : ++this.id,
+	  school : []
+	});
 }
 Lection.prototype.getLection = function(){
-	return this.lections.slice();
+	var arg = arguments;
+	if (arg.length == 0) {
+		return this.lections;
+	}
+	var filteredLections = [];
+	for (var i = 0; i < arg.length; i++) {
+	    this.lections.filter(function(lection) {
+	      if (lection.id == arg[i]){
+	      	filteredLections.push(lection);
+	      }
+		});
+	}
+	return filteredLections;
 }
-Lection.prototype.addSchoolToLection = function(school){
-	//for (var i = 0; i < arguments.length; i++) {
-		console.log(school);
-		if ( school instanceof School){
-			this.school.push(arguments[i]);
-		} else {
-			throw new Error('Такой школы нет!')
+Lection.prototype.deleteLection = function(){
+// 	var arg = arguments;
+// 	for (var i = 0; i < arg.length; i++) {
+// 	    this.lections.map(function(lection) {
+// 	      if (lection.id == arg[i]){
+// 	      	console.log(lection);
+// 	      	lection = null;
+// 	      }
+// 		});
+// 	}
+// 	console.log(this.lections);
+// arr.forEach(function(item, i, arr) {
+//   alert( i + ": " + item + " (массив:" + arr + ")" );
+});
+}
+Lection.prototype.addSchoolToLection = function( arrLections, school ){
+		var school = this._unique( school.split(', ') );
+		for (var i = 0; i < arrLections.length; i++) {
+			for (var j = 0; j < school.length; j++) {
+					arrLections[i].school.push(school[j]);
+			}
 		}
-	//}
 }
-
 function School(){
 	this._name;
 	this._count;
@@ -42,6 +69,7 @@ School.prototype.setSchool = function(){
     for (var i = 0; i < arguments.length; i++) {
       this.schools.push(arguments[i]);
       this.name = arguments[i].title;
+      this.count = arguments[i].title;
     }
 }
 School.prototype.getSchool = function(){
@@ -61,19 +89,19 @@ schools.setSchool({
 	title: 'shri',
 	count: 40
 });
-console.log(schools);
-console.log(lections.getSchool());
-var lections = new Lection();
-lections.setLection({
-	title: "ООП",
+var lection = new Lection();
+lection.setLection({
+	name: "ООП",
 });
-lections.addSchoolToLection('shmd');
-console.log(lections);
-lections.setLection({
-	title: "Мобильная"
+lection.setLection({
+	name: "Мобильная"
 });
-lections.setLection({
-	title: "Адаптивность",
+lection.setLection({
+	name: "Адаптивность"
 });
-
-console.log(lections.getLection());
+lection.setLection({
+	name: "Margin"
+});
+var lol = lection.getLection(1);
+lection.addSchoolToLection( lection.getLection(1,3,4), 'shmd, shri, shri, lolz, lolz, shmd'); //добавит только shmd, shri, lolz
+lection.deleteLection(2);
