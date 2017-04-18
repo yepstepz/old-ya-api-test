@@ -11,14 +11,6 @@ Lection.prototype._unique = function( array ){
 	}
 	return Object.keys(obj);
 }
-Lection.prototype.help = function(){
-	return 'Начать: var lection = new Lection(); \n' +
-	'Задать лекции и свойства: this.setLection( { property_name : property(string) } )\n' +
-	'Редактировать лекции: this.editLection( id_лекции, { property_name : property(string) } )\n' +
-	'Удалить лекцию: this.deleteLection( id_лекции ) \n' +
-	'Добавить школу к лекции: this.addSchoolToLection( school1[, school2, school3...])\n' +
-	'Добавить лектора: this.addLectorToLection( lector1[, lector2, lector3...])\n';
-}
 Lection.prototype.setLection = function(obj){
 	if ( !obj ){
 		throw new Error('Нельзя создать лекцию без названия.');
@@ -90,14 +82,38 @@ Lection.prototype.addSchoolToLection = function( arrLections, school ){
 		return 'Добавлены ' + this._unique(school);
 }
 Lection.prototype.editSchoolToLection = function(){
-		var school = school.split(', ');
-		for (var i = 0; i < arrLections.length; i++) {
-			for (var j = 0; j < school.length; j++) {
-					arrLections[i].school.push(school[j]);
-			}
-			arrLections[i].school = this._unique(arrLections[i].school);
+		var args = arguments;
+		var lection = this.lections[ arg[0] - 1 ];
+		var del = [];
+		if (args == 2 && args[1] == 0 ) {
+			lection.school = [];
+			return "Элементы удалены";
 		}
-		return 'Добавлены ' + this._unique(school);
+		if ( args == 3 ){
+			for (var i = 0; i < args[2].length; i++) {
+				for (var j = 0; j < lection.school.length; j++) {
+					 if ( args[2][i].indexof(lection.school[j]) ){
+					 	del.push(j);
+					 }
+				}
+
+			}
+			for (var i = 0; i < del.length; i++) {
+				lection.school.splice(del[i], 1);
+			}
+			return "Элементы удалены";
+		}
+		if (args == 4){
+			for (var i = 0; i < args[3].length; i++) {
+				for (var j = 0; j < lection.school.length; j++) {
+					 if ( args[3][i].indexof(lection.school[j]) ){
+					 	lection.school[j] = args[3][i];
+					 }
+				}
+
+			}
+			return "Элементы изменены";			
+		}
 }
 Lection.prototype.addLectorToLection = function( arrLections, lector ){
 		var lector = this._unique( lector.split(', ') );
@@ -159,3 +175,4 @@ lection.editLection( 2, {
 }); // отредактирует название у лекции с id = 2
 lection.addSchoolToLection( lection.getLection(1,3,4), 'shmd, shri, shri, lolz, lolz, shmd'); // не добавит дубли
 lection.addLectorToLection( lection.getLection(2,4), 'Алексей Тяпкин'); //добавит Алексея Тяпкина
+lection.editSchoolToLection(  )
