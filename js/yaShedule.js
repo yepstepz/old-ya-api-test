@@ -11,6 +11,17 @@ Lection.prototype._unique = function( array ){
 	}
 	return Object.keys(obj);
 }
+Lection.prototype._find = function( array, value ){
+	  if (array.indexOf) { // если метод существует
+	    return array.indexOf(value);
+	  }
+
+	  for (var i = 0; i < array.length; i++) {
+	    if (array[i] === value) return i;
+	  }
+
+	  return -1;
+}
 Lection.prototype.setLection = function(obj){
 	if ( !obj ){
 		throw new Error('Нельзя создать лекцию без названия.');
@@ -68,8 +79,17 @@ Lection.prototype.deleteLection = function(num){
 		if (num < 1){
 			throw new Error("Введите положительный ненулевой id элемента")
 		}
-		this.getLection(num);
-		this.lections.splice(num - 1, 1);
+		var arg = arguments;
+		var index;
+		for (var i = 0; i < arg.length; i++) {
+		    this.lections.filter(function(lection, k) {
+		      if (lection.id == arg[i]){
+		      	index = k;
+		      }
+			});
+	      	this.lections.splice(index, 1);
+		}
+		
 }
 Lection.prototype.addSchoolToLection = function( arrLections, school ){
 		var school = school.split(', ');
@@ -81,37 +101,45 @@ Lection.prototype.addSchoolToLection = function( arrLections, school ){
 		}
 		return 'Добавлены ' + this._unique(school);
 }
-Lection.prototype.editSchoolToLection = function(){
+Lection.prototype.editArrayLection = function(){
 		var args = arguments;
-		var lection = this.lections[ arg[0] - 1 ];
+		var lection;
+	    this.lections.filter(function(item) {
+	      if (item.id == args[0]){
+	      	lection = item;
+	      }
+		});
+		var type = args[1];
 		var del = [];
-		if (args == 2 && args[1] == 0 ) {
-			lection.school = [];
+		if (args.length == 3 && args[2] == 0 ) {
+			lection[type] = [];
 			return "Элементы удалены";
 		}
-		if ( args == 3 ){
-			for (var i = 0; i < args[2].length; i++) {
-				for (var j = 0; j < lection.school.length; j++) {
-					 if ( args[2][i].indexof(lection.school[j]) ){
-					 	del.push(j);
-					 }
-				}
-
-			}
-			for (var i = 0; i < del.length; i++) {
-				lection.school.splice(del[i], 1);
-			}
-			return "Элементы удалены";
-		}
-		if (args == 4){
+		if ( args.length == 4 && args[2] == 0 ){
 			for (var i = 0; i < args[3].length; i++) {
-				for (var j = 0; j < lection.school.length; j++) {
-					 if ( args[3][i].indexof(lection.school[j]) ){
-					 	lection.school[j] = args[3][i];
-					 }
+				var index = this._find( lection[type], args[3][i]);
+				if ( index != -1 ){
+					lection[type].splice( index, 1);
 				}
-
 			}
+			return "Элементы удалены";
+		}
+		if (args.length == 4 && args[2] != 0 ){
+			for (var i = 0; i < args[3].length; i++) {
+				lection[type].push( args[3][i] );
+			}
+			this._unique(lection[type]);
+			return "Элементы добавлены";			
+		}
+		if (args.length == 5 && args[2] != 0 ){
+			if (args[3].length != args[4].length){
+				throw new Error('Вы пытаетесь изменить массивы разной длины');
+			}
+			for (var i = 0; i < args[4].length; i++) {
+				var index = this._find( lection[type], args[3][i]);
+				lection[type][index] = args[4][i];
+			}
+			this._unique(lection[type]);
 			return "Элементы изменены";			
 		}
 }
@@ -169,10 +197,16 @@ lection.setLection({
 	name: "Margin"
 }); // добавит 4 лекции
 lection.addSchoolToLection( lection.getLection(1,3,4), 'shmd, shri, shri, lolz, lolz, shmd'); //добавит только shmd, shri, lolz
-lection.deleteLection(1); // удалит лекцию с id = 1
+lection.deleteLection(1); // удалит лекцию с id = 2
 lection.editLection( 2, {
 	name: "Мобильная лекция для начинающих"
 }); // отредактирует название у лекции с id = 2
 lection.addSchoolToLection( lection.getLection(1,3,4), 'shmd, shri, shri, lolz, lolz, shmd'); // не добавит дубли
 lection.addLectorToLection( lection.getLection(2,4), 'Алексей Тяпкин'); //добавит Алексея Тяпкина
-lection.editSchoolToLection(  )
+//lection.editArrayLection( 3, 'school', 0 ); // удалит все
+//lection.editArrayLection( 3, 'school', 0, ['shmd2', 'shmd']); // удалит shmd
+//lection.editArrayLection( 3, 'school', 0, ['shri', 'shmd']); // удалит два класса 'shri', 'shmd'
+//lection.editArrayLection( 3, 'school', 1, ['shmd2', 'shmr2'] ); // добавит два класса 'shmd2', 'shmr2'
+//lection.editArrayLection( 3, 'school', 1, ['shri, lolz'], ['shmr', 'lolz2'] ); // ошибка, массивы разной длины.
+//lection.editArrayLection( 3, 'school', 1, ['shri', 'lolz'], ['shmr', 'lolz2'] ); // вернет "shmd", "shmr", "lolz2"
+lection.editArrayLection( 3, 'lector', 1, ['Арсений', 'Иван']); // удалит shmd
