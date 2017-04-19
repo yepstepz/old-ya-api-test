@@ -1,9 +1,9 @@
-function Lection(){ 
+function Core(){ 
 
 }
-Lection.prototype.id = 0;
-Lection.prototype.lections = [];
-Lection.prototype._unique = function( array ){
+Core.prototype.id = 0;
+Core.prototype.lections = [];
+Core.prototype._unique = function( array ){
 	var obj = {};
 	for (var i = 0; i < array.length; i++) {
 	   var str = array[i];
@@ -11,7 +11,7 @@ Lection.prototype._unique = function( array ){
 	}
 	return Object.keys(obj);
 }
-Lection.prototype._find = function( array, value ){
+Core.prototype._find = function( array, value ){
 	  if (array.indexOf) { // если метод существует
 	    return array.indexOf(value);
 	  }
@@ -22,7 +22,7 @@ Lection.prototype._find = function( array, value ){
 
 	  return -1;
 }
-Lection.prototype.setLection = function(obj){
+Core.prototype.setLection = function(obj){
 	if ( !obj ){
 		throw new Error('Нельзя создать лекцию без названия.');
 	}
@@ -38,8 +38,8 @@ Lection.prototype.setLection = function(obj){
 	  time : []
 	});
 }
-Lection.prototype._editableProperties = [ 'name', 'time' ];
-Lection.prototype.getLection = function(){
+Core.prototype._editableProperties = [ 'name', 'time' ];
+Core.prototype.getLection = function(){
 	var arg = arguments;
 	if (arg.length == 0) {
 		return this.lections;
@@ -58,7 +58,7 @@ Lection.prototype.getLection = function(){
 	}
 	return filteredLections;
 }
-Lection.prototype.editLection = function( num, properties ){
+Core.prototype.editLection = function( num, properties ){
 		/*
 		*
 		* Лекцию можно отредактировать только
@@ -75,7 +75,7 @@ Lection.prototype.editLection = function( num, properties ){
 				}
 		}
 }
-Lection.prototype.deleteLection = function(num){
+Core.prototype.deleteLection = function(num){
 		if (num < 1){
 			throw new Error("Введите положительный ненулевой id элемента")
 		}
@@ -83,7 +83,7 @@ Lection.prototype.deleteLection = function(num){
 		var index;
 		for (var i = 0; i < arg.length; i++) {
 		    this.lections.filter(function(lection, k) {
-		      if (lection.id == arg[i]){
+		      if (Core.id == arg[i]){
 		      	index = k;
 		      }
 			});
@@ -91,7 +91,7 @@ Lection.prototype.deleteLection = function(num){
 		}
 		
 }
-Lection.prototype.addSchoolToLection = function( arrLections, school ){
+Core.prototype.addSchoolToLection = function( arrLections, school ){
 		var school = school.split(', ');
 		for (var i = 0; i < arrLections.length; i++) {
 			for (var j = 0; j < school.length; j++) {
@@ -101,7 +101,7 @@ Lection.prototype.addSchoolToLection = function( arrLections, school ){
 		}
 		return 'Добавлены ' + this._unique(school);
 }
-Lection.prototype.editArrayLection = function(){
+Core.prototype.editArrayLection = function(){
 		var args = arguments;
 		var lection;
 	    this.lections.filter(function(item) {
@@ -143,7 +143,7 @@ Lection.prototype.editArrayLection = function(){
 			return "Элементы изменены";			
 		}
 }
-Lection.prototype.addLectorToLection = function( arrLections, lector ){
+Core.prototype.addLectorToLection = function( arrLections, lector ){
 		var lector = this._unique( lector.split(', ') );
 		for (var i = 0; i < arrLections.length; i++) {
 			for (var j = 0; j < lector.length; j++) {
@@ -153,6 +153,10 @@ Lection.prototype.addLectorToLection = function( arrLections, lector ){
 		}
 		return 'Добавлены ' + this._unique(lector);
 }
+function Lection(){ 
+	Core.apply(this, arguments);
+}
+Lection.prototype = Object.create(Core.prototype);
 function School(){
 	this._name;
 	this._count;
@@ -197,16 +201,16 @@ lection.setLection({
 	name: "Margin"
 }); // добавит 4 лекции
 lection.addSchoolToLection( lection.getLection(1,3,4), 'shmd, shri, shri, lolz, lolz, shmd'); //добавит только shmd, shri, lolz
-lection.deleteLection(1); // удалит лекцию с id = 2
-lection.editLection( 2, {
-	name: "Мобильная лекция для начинающих"
-}); // отредактирует название у лекции с id = 2
-lection.addSchoolToLection( lection.getLection(1,3,4), 'shmd, shri, shri, lolz, lolz, shmd'); // не добавит дубли
-lection.addLectorToLection( lection.getLection(2,4), 'Алексей Тяпкин'); //добавит Алексея Тяпкина
+//lection.deleteLection(1); // удалит лекцию с id = 2
+//lection.editLection( 2, {
+//	name: "Мобильная лекция для начинающих"
+//}); // отредактирует название у лекции с id = 2
+//lection.addSchoolToLection( lection.getLection(1,3,4), 'shmd, shri, shri, lolz, lolz, shmd'); // не добавит дубли
+//lection.addLectorToLection( lection.getLection(2,4), 'Алексей Тяпкин'); //добавит Алексея Тяпкина
 //lection.editArrayLection( 3, 'school', 0 ); // удалит все
 //lection.editArrayLection( 3, 'school', 0, ['shmd2', 'shmd']); // удалит shmd
 //lection.editArrayLection( 3, 'school', 0, ['shri', 'shmd']); // удалит два класса 'shri', 'shmd'
 //lection.editArrayLection( 3, 'school', 1, ['shmd2', 'shmr2'] ); // добавит два класса 'shmd2', 'shmr2'
 //lection.editArrayLection( 3, 'school', 1, ['shri, lolz'], ['shmr', 'lolz2'] ); // ошибка, массивы разной длины.
 //lection.editArrayLection( 3, 'school', 1, ['shri', 'lolz'], ['shmr', 'lolz2'] ); // вернет "shmd", "shmr", "lolz2"
-lection.editArrayLection( 3, 'lector', 1, ['Арсений', 'Иван']); // удалит shmd
+//lection.editArrayLection( 3, 'lector', 1, ['Арсений', 'Иван']); // Добавит двух Лекторов
