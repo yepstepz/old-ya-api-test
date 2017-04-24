@@ -3,6 +3,12 @@ function Core(){
 }
 Core.prototype.id = 0;
 Core.prototype.entities = [];
+Core.prototype.lastId = function(){
+	if (this.entities.length == 0){
+		return 0;
+	}
+	return this.entities[ this.entities.length - 1 ].id;
+}
 Core.prototype._unique = function( array ){
 	var obj = {};
 	for (var i = 0; i < array.length; i++) {
@@ -57,6 +63,49 @@ Core.prototype._makedate = function( date ){
 		}
 		return date;
 }
+Core.prototype._deleteObject = function( mainArray, idArray ){
+		var index = 0;
+		var del = [];
+		var count = 0;
+		for (var i = 0; i < idArray.length; i++) {
+		    mainArray.filter(function(entity, k) {
+		      if (entity.id == idArray[i]){
+		      	index = k;
+		      }
+			});
+	      	del[count++] = mainArray.splice(index, 1)[0];
+		}
+		return del;
+}
+Core.prototype._getShedule =  function( lectionList ){
+	var lection = new Lection();
+	var shedule = [];
+	for (var i = 0; i < lectionList.length; i++) {
+		if ( lectionList[i].time > 0 ) {
+			date = lectionList[i].time;
+			showdate = lection.getDate( lectionList[i].id );
+		} else {
+			continue;
+		}
+		shedule.push({
+			school: lectionList[i].school.join(', '),
+			name: lectionList[i].name,
+			lector: lectionList[i].lector.join(', '),
+			showdate: showdate,
+			_date: date
+		});
+	}
+	return shedule.sort(this._sort);
+}
+Core.prototype._getSheduleByDate = function( datedShedule, startDate, endDate ){
+	var filteredShedule = [];
+	for (var i = 0; i < datedShedule.length; i++) {
+		if ( +startDate <= +datedShedule[i]._date && +endDate >= +datedShedule[i]._date ) {
+			filteredShedule.push(datedShedule[i]);
+		}
+	}
+	return filteredShedule.sort(this._sort);
+}
 Core.prototype.setEntity = function(obj){
 	if ( !obj ){
 		throw new Error('Нельзя создать объект без названия.');
@@ -77,7 +126,6 @@ Core.prototype.getEntity = function(){
 	for (var i = 0; i < arg.length; i++) {
 	    this.entities.filter(function(entity) {
 	      if (entity.id == arg[i]){
-
 	      	filteredEntities.push(entity);
 	      }
 		});
@@ -125,16 +173,7 @@ Core.prototype.deleteEntity = function(num){
 		}
 		var arg = arguments;
 		var index;
-		for (var i = 0; i < arg.length; i++) {
-		    this.entities.filter(function(entity, k) {
-		      if (entity.id == arg[i]){
-		      	index = k;
-		      }
-			});
-	      	del[count++] = this.entities.splice(index, 1)[0];
-		}
-		return del;
-		
+		return this._deleteObject( this.entities, arg );	
 }
 
 Core.prototype.addObjectToEntity = function( arrEntities, type, object ){
@@ -247,16 +286,23 @@ function Lection(){
 Lection.prototype = Object.create(Core.prototype);
 Lection.prototype.id = 0;
 Lection.prototype.entities = [];
+Lection.prototype.lastId = function(){
+	if (this.entities.length == 0){
+		return 0;
+	}
+	return this.entities[ this.entities.length - 1 ].id;
+}
 Lection.prototype.setEntity = function(obj){
 	Core.prototype.setEntity.apply(this, arguments);
+	var id = this.lastId();
 	this.entities.push({
 	  name : obj.name,
-	  id : ++this.id,
+	  id : ++id,
 	  school : [],
 	  lector : [],
 	  time : []
 	});
-	return 'Создан объект ' + obj.name + ' c id = ' +  this.id;
+	return 'Создан объект ' + obj.name + ' c id = ' +  id;
 }
 Lection.prototype.setDate = function( lection, date ){
 		var date = this._makedate( date );
@@ -282,16 +328,23 @@ function School(){
 School.prototype = Object.create(Core.prototype);
 School.prototype.id = 0;
 School.prototype.entities = [];
+School.prototype.lastId = function(){
+	if (this.entities.length == 0){
+		return 0;
+	}
+	return this.entities[ this.entities.length - 1 ].id;
+}
 School.prototype.setEntity = function(obj){
 	Core.prototype.setEntity.apply(this, arguments);
+	var id = this.lastId();
 	this.entities.push({
 	  name : obj.name,
-	  id : ++this.id,
+	  id : ++id,
 	  count : 0,
 	  lections : [],
 
 	});
-	return 'Создан объект ' + obj.name + ' c id = ' +  this.id;
+	return 'Создан объект ' + obj.name + ' c id = ' +  id;
 }
 School.prototype.setCount = function( id, number ){
 	if ( typeof( number ) != 'number' ) {
@@ -341,8 +394,11 @@ School.prototype.getLections = function(){
 	var allLections = lection.getEntity();
 	var selected = [];
 	var result = [];
-	if ( arguments.length < 1 ) {
-		throw new Error('Введите id школы');
+	if ( !arguments.length ) {
+		//throw new Error('Введите id школы');
+		for (var i = 0; i < this.getEntity().length; i++) {
+			entity.push(this.getEntity()[i]);
+		}		
 	}
 	if ( arguments.length ) {
 		for (var i = 0; i < arguments.length; i++) {
@@ -356,11 +412,6 @@ School.prototype.getLections = function(){
 			}
 		}
 	}
-	// if ( selected.length == 0 ) {
-	// 	throw new Error('Не найдено лекций с такой школой. \n' + 
-	// 					'добавьте школу лекции: addObjectToEntity' +
-	// 					'( id_лекции, "school", имя_школы );');
-	// }
 	selected = this._unique(selected);
 	for (var i = 0; i < selected.length; i++) {
 		result.push(lection.getEntity( selected[i] )[0] );
@@ -386,31 +437,19 @@ School.prototype.showShedule = function (){
 		}
 
 	}
-	var shedule = [];
-	for (var i = 0; i < lectionList.length; i++) {
-		if ( lectionList[i].time > 0 ) {
-			date = lectionList[i].time;
-			showdate = lection.getDate( lectionList[i].id );
-		} else {
-			continue;
+	if (! arguments.length ) {
+		for ( j = 0; j < this.getLections().length; j++ ){
+			lectionList.push(this.getLections()[j]);
 		}
-		shedule.push({
-			school: lectionList[i].school.join(', '),
-			name: lectionList[i].name,
-			lector: lectionList[i].lector.join(', '),
-			showdate: showdate,
-			_date: date
-		});
 	}
-	return shedule.sort(this._sort);
+	return this._getShedule( lectionList );
 }
 School.prototype.filterSheduleByDate = function ( arrSchool, startDate, endDate ){
 	var arrSchool = arrSchool;
 	var datedShedule = [];
-	var filteredShedule = [];
 	var startDate = this._makedate( startDate ); 
 	var endDate = this._makedate( endDate );
-	if ( arrSchool.length ) {
+	if ( arrSchool.length && typeof(arrSchool) == 'object' ) {
 		for (var i = 0; i < arrSchool.length; i++) {
 			var date = this.showShedule( arrSchool[i] );
 			for (var j = 0; j < date.length; j++) {
@@ -418,25 +457,31 @@ School.prototype.filterSheduleByDate = function ( arrSchool, startDate, endDate 
 			}
 		}
 	}
-	for (var i = 0; i < datedShedule.length; i++) {
-		if ( +startDate <= +datedShedule[i]._date && +endDate >= +datedShedule[i]._date ) {
-			filteredShedule.push(datedShedule[i]);
+	if ( arrSchool == 'all' ) {
+		for (var i = 0; i < this.showShedule().length; i++) {
+				datedShedule.push( this.showShedule()[i] );
 		}
 	}
-	return filteredShedule.sort(this._sort);
+	return this._getSheduleByDate( datedShedule, startDate, endDate );
 }
 function Cabinet(){ 
 	Core.apply(this, arguments);
 }
 Cabinet.prototype = Object.create(Core.prototype);
-Cabinet.prototype.id = 0;
 Cabinet.prototype.entities = [];
+Cabinet.prototype.lastId = function(){
+	if (this.entities.length == 0){
+		return 0;
+	}
+	return this.entities[ this.entities.length - 1 ].id;
+}
 Cabinet.prototype.setEntity = function(obj){
 	Core.prototype.setEntity.apply(this, arguments);
+	var id = this.lastId();
 	var capacity = obj.capacity > 0 ? obj.capacity : 0;
 	this.entities.push({
 	  name : obj.name,
-	  id : ++this.id,
+	  id : ++id,
 	  capacity : capacity,
 	  address: {
 	  	place: 'ул. Льва Толстого, 16',
@@ -445,7 +490,7 @@ Cabinet.prototype.setEntity = function(obj){
 	  },
 	  lections : []
 	});
-	return 'Создан кабинет ' + obj.name + ' c id = ' +  this.id;
+	return 'Создан кабинет ' + obj.name + ' c id = ' +  id;
 }
 Cabinet.prototype.setCapacity = function( id, number ){
 	if ( typeof( number ) != 'number' ) {
@@ -487,28 +532,15 @@ Cabinet.prototype.setAddress = function(id, address) {
 	}
 	return "Адрес аудитории: " + fullAddress.join(', ');	
 }
-Cabinet.prototype.setLections = function( id, arrLections ){
-	var lection = new Lection();
-	var lections;
-	var school = new School();
-	var schoolNames = {};
-	var cabinet = this.getEntity( id )[0];
-
-	for (var i = 0; i < school.getEntity().length; i++) {
-		schoolNames[ school.getEntity()[i].name ] = school.getEntity()[i].id;
-	}
-	lections = [];
-	if ( arrLections.length ) {
-		for (var i = 0; i < arrLections.length; i++) {
-			lections.push( lection.getEntity( arrLections[i] )[0] );
+Cabinet.prototype.checkCapacity = function( cabinet, lection ){
+		var school = new School();
+		var schoolNames = {};
+		for (var i = 0; i < school.getEntity().length; i++) {
+			schoolNames[ school.getEntity()[i].name ] = school.getEntity()[i].id;
 		}
-	} else {
-		lections.push(lection.getEntity( arrLections )[0]);
-	}
-	for (var i = 0; i < lections.length; i++) {
 		var index = [];
-		for (var j = 0; j < lections[i].school.length; j++) {
-			index.push( this._find( Object.keys( schoolNames ), lections[i].school[j] ) );
+		for (var j = 0; j < lection.school.length; j++) {
+			index.push( this._find( Object.keys( schoolNames ), lection.school[j] ) );
 		}
 		var ids = [];
 		for (var j = 0; j < index.length; j++) {
@@ -525,18 +557,101 @@ Cabinet.prototype.setLections = function( id, arrLections ){
 							"Максимальная вместительность: " + cabinet.capacity +
 							". Выберите другую");
 		}
-		cabinet.lections.push(lections[i]);
-/*
-*
-* Сделать проверку на то, что аудитория для лекции уже была добавлена.
-* Сделать вместо id - lastid.
-* Сделать минимальный графический интерфейс
-*
-*
-*
-*/
 
+		return lection;
+}
+Cabinet.prototype.checkOtherCabinets = function( lection ){
+	var id = lection.id;
+	var cabinetAll = this.getEntity();
+	for (var i = 0; i < cabinetAll.length; i++) {
+			for (var j = 0; j < cabinetAll[ i ].lections.length; j++){
+				if (cabinetAll[ i ].lections[ j ].id == id) {
+					var cabinetName = cabinetAll[i].name;
+					var cabinetId = cabinetAll[i].id;
+					throw new Error('Лекция c id = '+ id +' уже проводится в аудитории "' + 
+									 cabinetName + '" c id = ' + cabinetId);
+				}
+			}
 	}
+}
+Cabinet.prototype.setLections = function( id, arrLections ){
+	var lection = new Lection();
+	var cabinet = this.getEntity( id )[0];
+	var lections = [];
+	if ( arrLections.length ) {
+		for (var i = 0; i < arrLections.length; i++) {
+			lections.push( lection.getEntity( arrLections[i] )[0] );
+		}
+	} else {
+		lections.push(lection.getEntity( arrLections )[0]);
+	}
+	for (var i = 0; i < lections.length; i++) {
+			this.checkOtherCabinets( lections[i] )
+			cabinet.lections.push( this.checkCapacity( cabinet, lections[i] ) );
+	}
+	return "Добавлены " + lections.length + ' лекции \n ' +
+		   "к аудитории " + cabinet.name + " c id = " + arrLections.join(", ");	
+}
+Cabinet.prototype.deleteLections = function( id, arrLections ){
+	var cabinet = this.getEntity( id )[0];
+	var ids = [];
+	if ( cabinet.lections.length == 0){
+		throw new Error("Здесь нет лекций");
+	}
+	if ( arrLections.length) {
+		for (var i = 0; i < arrLections.length; i++) {
+			ids.push( arrLections[i] );
+		}
+	} else {
+		ids = arrLections;
+	}
+	return this._deleteObject( cabinet.lections, ids);
+}
+Cabinet.prototype.showShedule = function(){
+	var lection = new Lection();
+	var arg = arguments;
+	var shedule = [];
+	var ids = arguments;
+	var lectionList = [];
+	var allCabinet = this.getEntity();
+	if ( ids.length ) {
+		for (var i = 0; i < ids.length; i++) {
+			var cabinet = this.getEntity( ids[i] )[0];
+			for (var j = 0; j < cabinet.lections.length; j++) {
+				lectionList.push(cabinet.lections[j]);
+			}
+		}
+	}
+	if (! arguments.length ) {
+		for (var i = 0; i < allCabinet.length; i++) {
+			for ( j = 0; j < allCabinet[i].lections.length; j++){
+				lectionList.push(allCabinet[i].lections[j]);
+			}
+
+		}
+	}
+	return this._getShedule(lectionList);
+
+}
+Cabinet.prototype.filterSheduleByDate = function( arrCabinet, startDate, endDate ){
+	var arrCabinet = arrCabinet;
+	var datedShedule = [];
+	var startDate = this._makedate( startDate ); 
+	var endDate = this._makedate( endDate );
+	if ( arrCabinet.length && typeof(arrCabinet) == 'object' ) {
+		for (var i = 0; i < arrCabinet.length; i++) {
+			var date = this.showShedule( arrCabinet[i] );
+			for (var j = 0; j < date.length; j++) {
+				datedShedule.push(date[j]);
+			}
+		}
+	}
+	if ( arrCabinet == 'all' ) {
+		for (var i = 0; i < this.showShedule().length; i++) {
+				datedShedule.push( this.showShedule()[i] );
+		}
+	}
+	return this._getSheduleByDate( datedShedule, startDate, endDate );
 }
 var lection = new Lection();
 lection.setEntity({
