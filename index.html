@@ -8,9 +8,39 @@
 	    moment().format();
 	</script>
 	<script type="text/javascript" src="js/yaShedule.js"></script>
-	<script type="text/javascript" src="js/yaShedule_help.js"></script>
 </head>
 <body>
-	
+	<pre>
+	<div><a href="/example.html">Пример работы библиотеки</a></div>
+	<div><a href="/tests/">Тесты</a></div>
+	<div>
+	Список основных методов. <a href="js/yaShedule.js">Подробнее</a>
+		<ul>
+			<li>getEntity( [number] ) - получить объект.</li>
+			<li>setEntity({ name: [string] }) - задать объект.</li>
+			<li>editName( [number], [string] ) - отредактировать имя.</li>
+			<li>deleteEntity( [number] ) - удалить объект.</li>
+			<li>addObjectToEntity( [ numbers array ], [ string ], [objects array] ) - добавить объекту данные в параметры</li>
+			<li>changeEntityObject( [ numbers array ], [ string ], [old objects array], [new objects array] ) - изменить у объекта данные в массиве параметров.</li>
+			<li>deleteEntityObject([number] ) - удалить из массива параметров объект.</li>
+			<li>setDate( [number], [ string (dd.mm.yyy) ] ) - задать лекции дату.</li>
+			<li>getDate( [number] ) - получить отформатированную дату лекции.</li>
+			<li>setCount( [number] ) - задать школе количество учеников.</li>
+			<li>getLections( [number] ) - получить лекции, которые относятся к школе.</li>
+			<li>showShedule( [number] ) - показать упорядоченное расписание для школ или аудиторий. Вызов без аргументов покажет все даты.</li>
+			<li>filterSheduleByDate( [array], [string], [string]) - посмотреть раписание для школ или аудиторий в заданный интервал времени. Первый параметр "all" покажет все лекции в интервале.</li>
+			<li>setCapacity( id[number], [number] ) - установить вместимость у аудитории.</li>
+			<li>setAddress( [number], [object {classroom: [number]}]) - задать аудитории адрес.</li>
+			<li>setLections( [number], [array] ) - задать лекции аудитории.</li>
+			<li>deleteLections( [number], [array] ) - удалить у аудитории лекции.</li>
+		</ul>
+		<div>Начать использовать:</div>
+		<ul>
+			<li>var lection = new Lection() - теперь можно работать с лекциями, назначать лекторов, время и школы.</li>
+			<li>var school = new School() - теперь можно работать со школами, задавать количество учеников и смотреть расписание.</li>
+			<li>var cabinet = new Cabinet() - работа с аудиториями, можно задавать адрес, смотреть расписание и задавать вместительность.</li>
+		</ul>
+	</pre>
+	</div>
 </body>
 </html>

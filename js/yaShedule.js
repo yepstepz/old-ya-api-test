@@ -1,14 +1,31 @@
+/*
+ * @author yepstepz
+ * @version 1.0.0
+ */
 function Core(){ 
 
 }
 Core.prototype.id = 0;
 Core.prototype.entities = [];
+
+/**
+ * Возвращает последний id объекта.
+ *
+ * @return {number}.
+ */
 Core.prototype.lastId = function(){
 	if (this.entities.length == 0){
 		return 0;
 	}
 	return this.entities[ this.entities.length - 1 ].id;
 }
+/**
+ * Возвращает массив с уникальными объектами. Приватная функция
+ *
+ * @param {array} массив с повторами.
+ *
+ * @return {array} уникальный массив.
+ */
 Core.prototype._unique = function( array ){
 	var obj = {};
 	for (var i = 0; i < array.length; i++) {
@@ -17,6 +34,14 @@ Core.prototype._unique = function( array ){
 	}
 	return Object.keys(obj);
 }
+/**
+ * Ищет совпадения в массиве. Приватная функция
+ *
+ * @param {array} массив для поиска.
+ * @param {string} искомый объект
+ *
+ * @return {number} индекс найденного элемента.
+ */
 Core.prototype._find = function( array, value ){
 	  var array = array.join(', ').toLowerCase().split(', ');
 	  var value = value.toLowerCase();
@@ -29,6 +54,15 @@ Core.prototype._find = function( array, value ){
 
 	  return -1;
 }
+/**
+ * Производит замену в массиве. Приватная функция
+ *
+ * @param {array} массив для замены.
+ * @param {array} массив того, что нужно заменить
+ * @param {array} массив того, на что нужно заменять
+ *
+ * @return {number} индекс найденного элемента.
+ */
 Core.prototype._change = function( mainArray, firstWords, secondWords ){
 	for (var i = 0; i < firstWords.length; i++) {
 			var index = this._find( mainArray, firstWords[i] );
@@ -40,9 +74,24 @@ Core.prototype._change = function( mainArray, firstWords, secondWords ){
 	}
 	return mainArray;
 }
+/**
+ * Сортирует массив. Приватная функция
+ *
+ * @param {object}
+ * @param {object}
+ *
+ * @return {number}
+ */
 Core.prototype._sort = function( obj1, obj2 ){
 	return +obj1._date - +obj2._date;
 }
+/**
+ * Создает дату из moment.js. Приватная функция
+ *
+ * @param {string} Дата в виде "дд.мм.гггг"
+ *
+ * @return {object} возвращает объект moment.js
+ */
 Core.prototype._makedate = function( date ){
 		var typedDate = date;
 		var regExp = /^[0-9]{2}[.]{1}[0-9]{2}[.]{1}[0-9]{4}$/;
@@ -63,6 +112,14 @@ Core.prototype._makedate = function( date ){
 		}
 		return date;
 }
+/**
+ * Удаляет объект из массива. Приватная функция
+ *
+ * @param {array} Массив объектов
+ * @param {array} Массив объектов, которые нужно удалить
+ *
+ * @return {object} возвращает удаленные объекты
+ */
 Core.prototype._deleteObject = function( mainArray, idArray ){
 		var index = 0;
 		var del = [];
@@ -77,6 +134,13 @@ Core.prototype._deleteObject = function( mainArray, idArray ){
 		}
 		return del;
 }
+/**
+ * Создает массив с расписанием. Приватная функция
+ *
+ * @param {array} Массив объектов, у которых указано время
+ *
+ * @return {array} возвращает отсортированный по датам массив
+ */
 Core.prototype._getShedule =  function( lectionList ){
 	var lection = new Lection();
 	var shedule = [];
@@ -97,6 +161,15 @@ Core.prototype._getShedule =  function( lectionList ){
 	}
 	return shedule.sort(this._sort);
 }
+/**
+ * Проверка попадания массива во временной интервал. Приватная функция
+ *
+ * @param {array} Массив объектов с датами
+ * @param {object} Первая дата
+ * @param {object} Вторая дата
+ *
+ * @return {array} возвращает отсортированный по датам массив
+ */
 Core.prototype._getSheduleByDate = function( datedShedule, startDate, endDate ){
 	var filteredShedule = [];
 	for (var i = 0; i < datedShedule.length; i++) {
@@ -106,17 +179,29 @@ Core.prototype._getSheduleByDate = function( datedShedule, startDate, endDate ){
 	}
 	return filteredShedule.sort(this._sort);
 }
+/**
+ * Класс с ошибками для создания объекта.
+ *
+ */
 Core.prototype.setEntity = function(obj){
 	if ( !obj ){
 		throw new Error('Нельзя создать объект без названия.');
 	}
 	if ( typeof(obj) != "object" || !obj.name ){
 		throw new Error('Неправильно заданы параметры. \n'+
-					    'Обратитесь к документации библиотеки help()');
+					    'Обратитесь к документации библиотеки');
 	}
 	return 'Базовый метод';
 }
-Core.prototype._editableProperties = [ 'name', 'time' ];
+//Core.prototype._editableProperties = [ 'name', 'time' ];
+/**
+ * Функция для вывода объектов.
+ *
+ * @param {number} id объектов через запятую.
+ * пустая функция вернет все объекты.
+ *
+ * @return {array} возвращает массив с выбранными объектами
+ */
 Core.prototype.getEntity = function(){
 	var arg = arguments;
 	if (arg.length == 0) {
@@ -136,6 +221,14 @@ Core.prototype.getEntity = function(){
 	}
 	return filteredEntities;
 }
+/**
+ * Функция для переименования объекта.
+ *
+ * @param {number} id объекта.
+ * @param {string} новое имя.
+ *
+ * @return {string} возвращает имя. 
+ */
 Core.prototype.editName = function( num, name ){
 		/*
 		*
@@ -164,6 +257,13 @@ Core.prototype.editName = function( num, name ){
 			entity[ 'name' ] = name;
 			return entity[ 'name' ];
 }
+/**
+ * Функция для удаления объекта из сущности.
+ *
+ * @param {number} id объекта.
+ *
+ * @return {string} возвращает удаленный объект. 
+ */
 Core.prototype.deleteEntity = function(num){
 		var del = {};
 		var count = 0;
@@ -175,7 +275,16 @@ Core.prototype.deleteEntity = function(num){
 		var index;
 		return this._deleteObject( this.entities, arg );	
 }
-
+/**
+ * Функция для добавления объекта в массив параметров.
+ * Например, школы в массив школ для лекции.
+ *
+ * @param {array} id объекта(-ов).
+ * @param {string} имя массива, напр. school.
+ * @param {array} Массив объектов для добавления
+ *
+ * @return {string} возвращает строку с описанием добавленных объектов.
+ */
 Core.prototype.addObjectToEntity = function( arrEntities, type, object ){
 		var entity = [];
 		if (type == 'time' || type == "name" ){
@@ -203,6 +312,17 @@ Core.prototype.addObjectToEntity = function( arrEntities, type, object ){
 		}
 		return 'Добавлены ' + this._unique( object );
 }
+/**
+ * Функция для изменения объекта в массиве параметров.
+ * Например, школы в массиве школ для лекции.
+ *
+ * @param {array} id объекта(-ов).
+ * @param {string} имя массива, напр. school.
+ * @param {array} Массив объектов, которые нужно заменить
+ * @param {array} Массив объектов, на которые нужно заменить
+ *
+ * @return {string} возвращает строку с описанием добавленных объектов.
+ */
 Core.prototype.changeEntityObject = function(arrEntities, type, oldNames, newNames){
 		if (type == 'time' || type == "name" ){
 			throw new Error('Нельзя изменить ' + type +
@@ -234,6 +354,16 @@ Core.prototype.changeEntityObject = function(arrEntities, type, oldNames, newNam
 		}
 		return this._unique( result ).join(', ');
 }
+/**
+ * Функция для изменения объекта в массиве параметров.
+ * Например, школы в массиве школ для лекции.
+ *
+ * @param {array} id объекта.
+ * @param {string} имя массива, напр. school.
+ * @param {array} Массив объектов, которые нужно удалить
+ *
+ * @return {string} возвращает строку с описанием оставшихся объектов.
+ */
 Core.prototype.deleteEntityObject = function( entity, type, array ){
 		/*
 		*
@@ -258,6 +388,15 @@ Core.prototype.deleteEntityObject = function( entity, type, array ){
 				this._change( entity[type], array, [] ).join(', ');
 
 }
+/**
+ * Проверяет, использована ли уже дата.
+ *
+ * @param {object} дата в виде moment.js.
+ * @param {string} имя массива, напр. school.
+ * @param {array} Массив объектов, которые нужно проверить
+ *
+ * @return {string} возвращает ошибку, если дата уже использовалась
+ */
 Core.prototype.checkDate = function ( date, type, array ){
 	var double = [];
 	for (var i = 0; i < this.entities.length; i++) {
@@ -280,6 +419,9 @@ Core.prototype.checkDate = function ( date, type, array ){
 	}
 	return true;
 }
+/**
+ * Прототипы для Лекций, основные описаны выше.
+ */
 function Lection(){ 
 	Core.apply(this, arguments);
 }
@@ -292,6 +434,14 @@ Lection.prototype.lastId = function(){
 	}
 	return this.entities[ this.entities.length - 1 ].id;
 }
+/**
+ * Задает объект и добавляет его в общий массив.
+ *
+ * @param {object} объект с данными.
+ * @param {object} obj.name имя.
+ *
+ * @return {string} Возврашает строку с описанием созданного объекта.
+ */
 Lection.prototype.setEntity = function(obj){
 	Core.prototype.setEntity.apply(this, arguments);
 	var id = this.lastId();
@@ -304,6 +454,14 @@ Lection.prototype.setEntity = function(obj){
 	});
 	return 'Создан объект ' + obj.name + ' c id = ' +  id;
 }
+/**
+ * Задает дату лекции
+ *
+ * @param {number} объект с данными.
+ * @param {string} дата в виде "дд.мм.гггг"
+ *
+ * @return {string} Возвращщает отформатированную дату.
+ */
 Lection.prototype.setDate = function( lection, date ){
 		var date = this._makedate( date );
 		var lection =  this.getEntity( lection )[0];
@@ -318,6 +476,13 @@ Lection.prototype.setDate = function( lection, date ){
 		lection.time = date;
 		return lection.time.format("D MMMM YYYY (dddd)");
 }
+/**
+ * Получает дату лекции
+ *
+ * @param {number} объект с данными.
+ *
+ * @return {string} Возвращает отформатированную дату.
+ */
 Lection.prototype.getDate = function( lection ){
 	var date = this.getEntity( lection )[0].time;
 	return date.format("D MMMM YYYY (dddd)");
@@ -325,6 +490,9 @@ Lection.prototype.getDate = function( lection ){
 function School(){ 
 	Core.apply(this, arguments);
 }
+/**
+ * Прототипы для School.
+ */
 School.prototype = Object.create(Core.prototype);
 School.prototype.id = 0;
 School.prototype.entities = [];
@@ -334,6 +502,11 @@ School.prototype.lastId = function(){
 	}
 	return this.entities[ this.entities.length - 1 ].id;
 }
+/**
+ * Создает объект School.
+ * @param {string} name имя
+ * @param {number} количество
+ */
 School.prototype.setEntity = function(obj){
 	Core.prototype.setEntity.apply(this, arguments);
 	var id = this.lastId();
@@ -346,6 +519,14 @@ School.prototype.setEntity = function(obj){
 	});
 	return 'Создан объект ' + obj.name + ' c id = ' +  id;
 }
+/**
+ * Устанавливает количество учеников школы
+ *
+ * @param {number} id
+ * @param {number} количество
+ *
+ * @return {string} Возвращает строку с информацией
+ */
 School.prototype.setCount = function( id, number ){
 	if ( typeof( number ) != 'number' ) {
 		throw new Error('Введите число');
@@ -358,10 +539,13 @@ School.prototype.setCount = function( id, number ){
 	return "Количество человек в школе: " + number;
 }
 /*
+* Переименование с проверкой на уникальность.
+* При переименовании заменяет в лекциях имя школы.
+* 
+* @param {number} id
+* @param {number} на что заменить имя.
 *
-* Здесь можно реализовать переименование
-* лекций при переименовании таких в школе.
-*
+* @return {string} Возвращает строку с информацией
 */
 School.prototype.editName = function( id, str ){
 	if ( typeof( str ) != 'string' || str == '' ) {
@@ -388,6 +572,13 @@ School.prototype.editName = function( id, str ){
 	school.name = str;
 	return "Новое название: " + str;
 }
+/*
+* Выводит лекции, у которых прописана школа.
+* 
+* @param {number} id. Без параметров вернет все лекции со школами.
+*
+* @return {array} Возвращает массив с результатом
+*/
 School.prototype.getLections = function(){
 	var entity = [];
 	var lection = new Lection();
@@ -419,6 +610,11 @@ School.prototype.getLections = function(){
 	return result;
 }
 /*
+* Выводит расписание. 
+* 
+* @param {number} id. Без параметров вернет все лекции с датой.
+*
+* @return {array} Возвращает упорядоченный массив
 *
 * Можно объединить эти две функции,
 * отрегулировать работу в зависимости от
@@ -444,6 +640,16 @@ School.prototype.showShedule = function (){
 	}
 	return this._getShedule( lectionList );
 }
+/*
+* Выводит расписание в заданный интервал дат. 
+* 
+* @param {number} id. "all" вернет все лекции с датой.
+* @param {string} Первая дата
+* @param {string} Вторая дата
+*
+* @return {array} Возвращает упорядоченный массив
+*
+*/
 School.prototype.filterSheduleByDate = function ( arrSchool, startDate, endDate ){
 	var arrSchool = arrSchool;
 	var datedShedule = [];
@@ -464,6 +670,9 @@ School.prototype.filterSheduleByDate = function ( arrSchool, startDate, endDate 
 	}
 	return this._getSheduleByDate( datedShedule, startDate, endDate );
 }
+/*
+*Прототип для аудитории.
+*/
 function Cabinet(){ 
 	Core.apply(this, arguments);
 }
@@ -492,6 +701,14 @@ Cabinet.prototype.setEntity = function(obj){
 	});
 	return 'Создан кабинет ' + obj.name + ' c id = ' +  id;
 }
+/*
+* Задает вместимость аудитории.
+* 
+* @param {number} id. 
+* @param {namber} вместимость 
+*
+* @return {string} Возвращает строку с описанием.
+*/
 Cabinet.prototype.setCapacity = function( id, number ){
 	if ( typeof( number ) != 'number' ) {
 		throw new Error('Введите число');
@@ -503,6 +720,18 @@ Cabinet.prototype.setCapacity = function( id, number ){
 	cabinet.capacity = number;
 	return "Количество мест в аудитории: " + number;
 }
+/*
+* Задает адрес аудитории.
+* 
+* @param {number} id. 
+* @param {object} адрес в виде объекта:
+* {
+*  classroom: {number} номер кабинета
+*  floor: {number} 	этаж
+* }
+*
+* @return {string} Возвращает строку с описанием.
+*/
 Cabinet.prototype.setAddress = function(id, address) {
 	if ( typeof(address) != 'object'){
 		throw new Error('Адрес нужно указать в виде {type: name}!');
@@ -532,6 +761,15 @@ Cabinet.prototype.setAddress = function(id, address) {
 	}
 	return "Адрес аудитории: " + fullAddress.join(', ');	
 }
+/*
+* Проверяет, вместятся ли все студенты
+* 
+* @param {number} id. 
+* @param {object} объект лекции 
+*
+* @return {object} Ошибка, если не вмещаются,
+* объект лекции, если все в порядке
+*/
 Cabinet.prototype.checkCapacity = function( cabinet, lection ){
 		var school = new School();
 		var schoolNames = {};
@@ -560,6 +798,14 @@ Cabinet.prototype.checkCapacity = function( cabinet, lection ){
 
 		return lection;
 }
+/*
+* Проверяет, есть ли у лекции уже кабинет
+* 
+* @param {object} объект лекции 
+*
+* @return {object} Ошибка, если есть,
+* объект лекции, если все в порядке
+*/
 Cabinet.prototype.checkOtherCabinets = function( lection ){
 	var id = lection.id;
 	var cabinetAll = this.getEntity();
@@ -573,7 +819,16 @@ Cabinet.prototype.checkOtherCabinets = function( lection ){
 				}
 			}
 	}
+	return true;
 }
+/*
+* Задает лекции аудитории.
+* 
+* @param {number} id. 
+* @param {array} массив лекций
+*
+* @return {string} Строка с описанием 
+*/
 Cabinet.prototype.setLections = function( id, arrLections ){
 	var lection = new Lection();
 	var cabinet = this.getEntity( id )[0];
@@ -592,6 +847,14 @@ Cabinet.prototype.setLections = function( id, arrLections ){
 	return "Добавлены " + lections.length + ' лекции \n ' +
 		   "к аудитории " + cabinet.name + " c id = " + arrLections.join(", ");	
 }
+/*
+* Удаляет лекции из аудитории
+* 
+* @param {number} id. 
+* @param {array} массив лекций
+*
+* @return {object} объект удаленных лекций 
+*/
 Cabinet.prototype.deleteLections = function( id, arrLections ){
 	var cabinet = this.getEntity( id )[0];
 	var ids = [];
@@ -607,6 +870,10 @@ Cabinet.prototype.deleteLections = function( id, arrLections ){
 	}
 	return this._deleteObject( cabinet.lections, ids);
 }
+/*
+*Показывает расписание.
+*Работает аналогично School.prototype.showShedule
+*/
 Cabinet.prototype.showShedule = function(){
 	var lection = new Lection();
 	var arg = arguments;
@@ -653,69 +920,3 @@ Cabinet.prototype.filterSheduleByDate = function( arrCabinet, startDate, endDate
 	}
 	return this._getSheduleByDate( datedShedule, startDate, endDate );
 }
-var lection = new Lection();
-lection.setEntity({
-	name: "ООП",
-});
-lection.setEntity({
-	name: "Мобильная"
-});
-lection.setEntity({
-	name: "Адаптивность"
-});
-lection.setEntity({
-	name: "Margin"
-});
-lection.setEntity({
-	name: "Замыкания"
-});
-lection.setEntity({
-	name: "Промисы"
-});
-lection.setEntity({
-	name: "Верстка"
-}); // добавит 4 лекции
-lection.addObjectToEntity([5,7], 'school', 'Школа Продвижения сайтов');
-lection.addObjectToEntity([6], 'school', 'Школа Менеджмента');
-lection.setDate(5, "22.05.2017");
-lection.setDate(6, "23.07.2017");
-lection.setDate(7, "20.02.2017");
-var school = new School();
-school.setEntity({
-	name: "Школа Мобильной Разработки",
-	count: 20
-});
-school.setEntity({
-	name: "Школа Менеджмента"
-});
-school.setEntity({
-	name: "Школа Анализа Данных"
-});
-school.setEntity({
-	name: "Школа Интернет-Маркетинга"
-});
-school.setEntity({
-	name: "Школа Продвижения сайтов"
-});
-school.setCount(2, 30);
-school.setCount(3, 25);
-school.setCount(5, 30);
-school.setCount(4, 20);
-var cabinet = new Cabinet();
-cabinet.setEntity({
-	name: "Синяя аудитория",
-	capacity: 60
-});
-cabinet.setEntity({
-	name: "Красная аудитория"
-});
-cabinet.setEntity({
-	name: "Зеленая аудитория"
-});
-cabinet.setEntity({
-	name: "Розовая аудитория"
-});
-
-cabinet.setCapacity(2, 100);
-cabinet.setCapacity(3, 200);
-cabinet.setCapacity(4, 200);

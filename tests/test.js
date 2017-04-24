@@ -4,7 +4,11 @@ describe("Лекции", function() {
   	describe("Создание элемента", function() {
 	  it("создаст элемент", function() {
 	  	var lection = new Lection();
-	  	assert.equal(lection.setEntity({name: "name"}), "Создан объект name c id = 8");
+	  	assert.equal(lection.setEntity({name: "Подготовительная лекция"}), "Создан объект Подготовительная лекция c id = 8");
+	  });
+	  it("нельзя без имени", function() {
+	  	var lection = new Lection();
+	  	 assert.throws(function () {lection.setEntity()}, Error);
 	  });
   	})
   	describe("Удаление элемента", function() {
@@ -237,17 +241,11 @@ describe("Школы", function() {
 	  });
   });
 });
-describe("Школы", function() {
+describe("Аудитории", function() {
   describe("constructor", function() {
-	  describe("Задать кабинет", function() {
-		  it("Выдаст ошибки, если ввести без имени", function() {
-		  	var school = new School();
-		   	assert.throws(function () {cabinet.setEntity()}, Error );;
-		  });		  	
-	  });
 	  describe("Задать количество", function() {
 		  it("Задаст количество человек в школе", function() {
-		  	//var cabinet = new Cabinet();
+		  	var cabinet = new Cabinet();
 		    assert.equal(cabinet.setCapacity(3, 100), "Количество мест в аудитории: 100" );
 		  });
 		  it("Нельзя задать пустое значение", function() {
@@ -301,10 +299,38 @@ describe("Школы", function() {
 		    assert.throws(function () {cabinet.setLections(1, [3]) }, Error );
 		  });  	  		
   	  })
-  	  describe("Показать расписание лекций", function() {
-  	  });
-  	  describe("Показать расписание лекций в интервалах", function() {
-  	  });		
+	  describe("Вывести расписание аудитории", function() {
+		  it("Вывести лекции нескольких аудиторий", function() {
+		  	var cabinet = new Cabinet();
+		   	assert.equal( cabinet.showShedule(2).length, 2 );
+		  });
+		  it("Вывести лекции одной аудитории", function() {
+		  	var cabinet = new Cabinet();
+		   	assert.equal( cabinet.showShedule(2).length, 2 );
+		  });
+		  it("Вывести все лекции аудиторий", function() {
+		  	var cabinet = new Cabinet();
+		   	assert.equal( cabinet.showShedule().length, 2 );
+		  });
+	  });
+	  describe("Вывести расписание аудиторий в интервал дат", function() {
+		  it("Вывести лекции нескольких аудиторий", function() {
+		  	var cabinet = new Cabinet();
+		   	assert.equal( cabinet.filterSheduleByDate([2], "12.01.2017", "24.04.2017")[1].showdate, '24 апреля 2017 (понедельник)' );
+		  });
+		  it("Вывести лекции одной аудитории", function() {
+		  	var cabinet = new Cabinet();
+		   	assert.equal( cabinet.filterSheduleByDate([2], "12.01.2017", "24.04.2017")[0].showdate, "24 апреля 2017 (понедельник)" );
+		  });
+		  it("Вывести все лекции в интервале", function() {
+		  	var cabinet = new Cabinet();
+		   	assert.equal( cabinet.filterSheduleByDate("all", "12.01.2017", "24.04.2017")[0].showdate, "24 апреля 2017 (понедельник)" );
+		  });
+		  it("Выдаст ошибки, если ввести без дат", function() {
+		  	var cabinet = new Cabinet();
+		   assert.throws(function () {cabinet.filterSheduleByDate([2])}, Error );;
+		  });	  	
+	  });
   });
 });
 });
